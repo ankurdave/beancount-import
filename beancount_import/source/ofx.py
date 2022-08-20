@@ -929,7 +929,6 @@ class ParsedOfxStatement(object):
                             flag=None,
                         ))
                 if raw.trantype == 'INCOME':
-                    assert total >= ZERO
                     security = get_security(raw.uniqueid)
                     if security is None:
                         continue
