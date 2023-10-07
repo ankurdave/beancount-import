@@ -17,6 +17,7 @@ from glob import glob
 from collections import OrderedDict
 import itertools
 from typing import Hashable, List, Dict, Optional
+import copy
 
 from beancount.core.data import Balance, Transaction, Posting,  Directive
 from beancount.core.amount import Amount
@@ -50,7 +51,10 @@ class ImporterSource(DescriptionBasedSource):
                            )
         ]
         # filter the valid files for this importer
-        self.files = [f for f in files if self.importer.identify(f)]
+        self.files = [f for f in files if self.get_importer().identify(f)]
+
+    def get_importer(self):
+        return copy.deepcopy(self.importer)
 
     @property
     def name(self) -> str:
@@ -61,7 +65,7 @@ class ImporterSource(DescriptionBasedSource):
 
         entries = OrderedDict() #type: Dict[Hashable, List[Directive]]
         for f in self.files:
-            f_entries = self.importer.extract(f, existing_entries=journal.entries)
+            f_entries = self.get_importer().extract(f, existing_entries=journal.entries)
             # collect  all entries in current statement, grouped by hash
             hashed_entries = OrderedDict() #type: Dict[Hashable, Directive]
             for entry in f_entries:
